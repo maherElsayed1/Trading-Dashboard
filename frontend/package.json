@@ -1,17 +1,22 @@
 {
-  "name": "trading-dashboard",
+  "name": "trading-dashboard-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.4.6"
+    "next": "15.4.6",
+    "lightweight-charts": "^4.1.0",
+    "axios": "^1.6.0",
+    "clsx": "^2.0.0"
   },
   "devDependencies": {
     "typescript": "^5",
