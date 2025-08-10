@@ -48,8 +48,8 @@ export class MarketDataService {
     const tickers = this.tickerModel.getAllTickers();
     
     tickers.forEach(ticker => {
-      // Random chance to update each ticker (not all update every cycle)
-      if (Math.random() > 0.3) {
+      // Update more frequently - 80% chance each cycle
+      if (Math.random() > 0.2) {
         const updated = this.tickerModel.updatePrice(ticker.symbol);
         if (updated) {
           this.broadcastPriceUpdate(ticker.symbol, updated);
@@ -78,6 +78,8 @@ export class MarketDataService {
     };
 
     const messageStr = JSON.stringify(message);
+    
+    console.log(`📊 Broadcasting price update for ${symbol}: $${ticker.price.toFixed(2)} to ${subscribers.size} subscribers`);
     
     subscribers.forEach(ws => {
       if (ws.readyState === WebSocket.OPEN) {

@@ -1,4 +1,4 @@
-import { Ticker, TickerHistory, MarketStatus } from '../../shared/types/ticker.types';
+import { Ticker, TickerHistory, MarketStatus, HistoricalDataPoint } from '../../shared/types/ticker.types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -47,8 +47,16 @@ class ApiService {
     return response.data;
   }
 
-  async getTickerHistory(symbol: string, days: number = 30): Promise<TickerHistory[]> {
-    const response = await this.fetchJson<{ success: boolean; data: TickerHistory[] }>(
+  async getTickerHistory(symbol: string, days: number = 30): Promise<any> {
+    const response = await this.fetchJson<{ 
+      success: boolean; 
+      data: {
+        symbol: string;
+        interval: string;
+        dataPoints: HistoricalDataPoint[];
+      };
+      count: number;
+    }>(
       `${API_BASE_URL}/tickers/${symbol}/history?days=${days}`
     );
     return response.data;

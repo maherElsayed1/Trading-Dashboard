@@ -39,9 +39,15 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     ];
 
     if (autoConnect) {
-      websocketService.connect().catch(err => {
-        setError(err.message || 'Failed to connect');
-      });
+      console.log('[useWebSocket] Auto-connecting to WebSocket...');
+      websocketService.connect()
+        .then(() => {
+          console.log('[useWebSocket] WebSocket connected successfully');
+        })
+        .catch(err => {
+          console.error('[useWebSocket] Connection failed:', err);
+          setError(err.message || 'Failed to connect');
+        });
     }
 
     return () => {

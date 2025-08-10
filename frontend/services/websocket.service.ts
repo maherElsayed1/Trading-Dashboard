@@ -8,7 +8,12 @@ export interface WebSocketEvent {
 }
 
 export interface PriceUpdateEvent {
-  ticker: Ticker;
+  ticker?: Ticker;
+  symbol?: string;
+  price?: number;
+  change?: number;
+  changePercent?: number;
+  volume?: number;
   timestamp: string;
 }
 
@@ -56,9 +61,13 @@ class WebSocketService {
           const data = JSON.parse(event.data);
           
           if (data.type === 'price_update' && data.data) {
+            // The data.data contains the price update with symbol, price, etc.
             this.emit({
               type: 'price-update',
-              data: data.data as PriceUpdateEvent,
+              data: {
+                ...data.data,
+                timestamp: data.timestamp || new Date().toISOString()
+              } as PriceUpdateEvent,
             });
           } else if (data.type === 'error') {
             this.emit({
@@ -151,7 +160,9 @@ class WebSocketService {
       return;
     }
 
-    this.ws.send(JSON.stringify({ type, data }));
+    const message = JSON.stringify({ type, data });
+    console.log('[WebSocket] Sending message:', message);
+    this.ws.send(message);
   }
 
   on(event: WebSocketEventType, callback: (event: WebSocketEvent) => void) {

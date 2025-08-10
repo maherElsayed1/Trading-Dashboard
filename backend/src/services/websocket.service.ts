@@ -78,22 +78,30 @@ export class WebSocketService {
     }
   }
 
-  private handleSubscribe(ws: WebSocket, message: SubscribeMessage): void {
-    const { symbols } = message;
+  private handleSubscribe(ws: WebSocket, message: any): void {
+    // Handle both formats: { symbols: [...] } and { data: { symbols: [...] } }
+    const symbols = message.symbols || message.data?.symbols || [];
+    console.log('Received subscription request for symbols:', symbols);
+    
     const clientSubscriptions = this.clients.get(ws);
     
-    if (!clientSubscriptions) return;
+    if (!clientSubscriptions) {
+      console.error('Client not found in subscription tracking');
+      return;
+    }
     
     const results: any[] = [];
     
-    symbols.forEach(symbol => {
+    symbols.forEach((symbol: string) => {
       const success = this.marketDataService.subscribe(symbol, ws);
       
       if (success) {
         clientSubscriptions.add(symbol);
         results.push({ symbol, status: 'subscribed' });
+        console.log(`✅ Client subscribed to ${symbol}`);
       } else {
         results.push({ symbol, status: 'failed', reason: 'Invalid symbol' });
+        console.log(`❌ Failed to subscribe to ${symbol}`);
       }
     });
     

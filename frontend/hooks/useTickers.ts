@@ -33,19 +33,42 @@ export function useTickers() {
     if (!isConnected || tickers.length === 0) return;
 
     // Subscribe to all tickers
+    console.log('[useTickers] Subscribing to tickers:', tickers.map(t => t.symbol));
     tickers.forEach(ticker => {
+      console.log(`[useTickers] Subscribing to ${ticker.symbol}`);
       subscribe(ticker.symbol);
     });
 
     // Handle price updates
     const unsubscribePriceUpdate = onPriceUpdate((event: PriceUpdateEvent) => {
-      setTickers(prevTickers => 
-        prevTickers.map(ticker => 
-          ticker.symbol === event.ticker.symbol
-            ? { ...ticker, ...event.ticker }
-            : ticker
-        )
-      );
+      // Handle both possible formats from WebSocket
+      const symbol = event.ticker?.symbol || event.symbol;
+      const price = event.ticker?.price || event.price;
+      
+      if (symbol && price) {
+        console.log('Price update received:', symbol, '@', price);
+        
+        setTickers(prevTickers => 
+          prevTickers.map(ticker => {
+            if (ticker.symbol === symbol) {
+              // If we have a full ticker object, use it, otherwise update specific fields
+              if (event.ticker) {
+                return { ...ticker, ...event.ticker };
+              } else {
+                return {
+                  ...ticker,
+                  price: event.price || ticker.price,
+                  change: event.change !== undefined ? event.change : ticker.change,
+                  changePercent: event.changePercent !== undefined ? event.changePercent : ticker.changePercent,
+                  volume: event.volume || ticker.volume,
+                  timestamp: event.timestamp || ticker.timestamp
+                };
+              }
+            }
+            return ticker;
+          })
+        );
+      }
     });
 
     return () => {
