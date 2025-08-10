@@ -89,3 +89,6 @@ tmp/
 temp/
 .tmp/
 .cache/
+
+.claude/
+CLAUDE.md
