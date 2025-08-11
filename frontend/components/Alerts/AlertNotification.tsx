@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { websocketService } from '../../services/websocket.service';
 import { Ticker } from '../../../shared/types/ticker.types';
@@ -15,6 +15,18 @@ interface TriggeredAlert {
   message: string;
 }
 
+interface AlertEventData {
+  alert?: {
+    id?: string;
+    symbol: string;
+    type: 'above' | 'below';
+    threshold: number;
+    triggeredAt?: string;
+  };
+  ticker?: Ticker;
+  message?: string;
+}
+
 interface AlertNotificationProps {
   tickers: Ticker[];
 }
@@ -24,7 +36,6 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
   const [notifications, setNotifications] = useState<TriggeredAlert[]>([]);
   const [showNotifications, setShowNotifications] = useState(true);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Check notification permission on mount
   useEffect(() => {
@@ -40,9 +51,7 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
     // Set up WebSocket alert listener
     
     // Listen for alert events from WebSocket
-    const handleAlertTriggered = (event: any) => {
-      // console.log('[AlertNotification] WebSocket alert event received:', event);
-      
+    const handleAlertTriggered = (event: { data?: AlertEventData }) => {
       // Only process if authenticated
       if (!isAuthenticated) {
         // Skipping alert - not authenticated
@@ -103,7 +112,8 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
   const playAlertSound = () => {
     // Create a simple beep sound using Web Audio API
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const audioContext = new AudioContextClass();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       
@@ -157,9 +167,9 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
 
   return (
     <>
-      {/* Floating Notification Panel */}
+      {/* Floating Notification Panel - Responsive */}
       {showNotifications && notifications.length > 0 ? (
-        <div className="fixed top-20 right-4 z-50 w-[420px] space-y-3">
+        <div className="fixed top-20 right-4 left-4 sm:left-auto z-50 max-w-[420px] sm:w-[420px] space-y-3">
           {notifications.map((notification, index) => {
             const priceChange = notification.currentPrice - notification.threshold;
             const percentChange = (priceChange / notification.threshold) * 100;

@@ -47,22 +47,22 @@ export const Dashboard: React.FC = () => {
         {/* Alert Notifications */}
         <AlertNotification tickers={tickers} />
         
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6 py-4 sm:py-6">
         {/* Dashboard Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-white">Market Overview</h2>
-            <p className="text-gray-400 mt-1">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">Market Overview</h2>
+            <p className="text-sm sm:text-base text-gray-400 mt-1">
               Track real-time prices across stocks and cryptocurrencies
             </p>
           </div>
           
           {!loading && (
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-500">
+            <div className="flex items-center gap-4">
+              <div className="text-xs sm:text-sm text-gray-500">
                 {tickers.length} Markets
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-xs sm:text-sm text-gray-500">
                 Updates every 2s
               </div>
             </div>
@@ -71,7 +71,7 @@ export const Dashboard: React.FC = () => {
 
         {/* Market Stats */}
         {!loading && tickers.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
               <p className="text-gray-400 text-sm mb-1">Total Markets</p>
               <p className="text-2xl font-bold text-white">{tickers.length}</p>
@@ -102,12 +102,12 @@ export const Dashboard: React.FC = () => {
 
         {/* Chart Section */}
         {selectedTicker && (
-          <div className="space-y-4">
-            <div className="bg-blue-900/10 border border-blue-800 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-4">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="bg-blue-900/10 border border-blue-800 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-400 text-sm mb-1">Selected Market</p>
-                  <p className="text-xl font-bold text-white">
+                  <p className="text-blue-400 text-xs sm:text-sm mb-1">Selected Market</p>
+                  <p className="text-lg sm:text-xl font-bold text-white">
                     {selectedTicker.symbol} - {selectedTicker.name}
                   </p>
                 </div>

@@ -16,7 +16,6 @@ class CacheService {
       ttl
     };
     this.cache.set(key, entry);
-    console.log(`💾 Cached: ${key} (TTL: ${ttl}ms)`);
   }
 
   // Get a cache entry
@@ -31,11 +30,9 @@ class CacheService {
     const now = Date.now();
     if (now - entry.timestamp > entry.ttl) {
       this.cache.delete(key);
-      console.log(`🗑️ Cache expired: ${key}`);
       return null;
     }
 
-    console.log(`✅ Cache hit: ${key}`);
     return entry.data as T;
   }
 
@@ -56,9 +53,6 @@ class CacheService {
   // Delete a cache entry
   delete(key: string): boolean {
     const deleted = this.cache.delete(key);
-    if (deleted) {
-      console.log(`🗑️ Cache deleted: ${key}`);
-    }
     return deleted;
   }
 
@@ -66,7 +60,6 @@ class CacheService {
   clear(): void {
     const size = this.cache.size;
     this.cache.clear();
-    console.log(`🧹 Cache cleared: ${size} entries removed`);
   }
 
   // Get cache statistics
@@ -106,9 +99,6 @@ class CacheService {
       }
     });
 
-    if (cleaned > 0) {
-      console.log(`🧹 Cache cleanup: ${cleaned} expired entries removed`);
-    }
   }
 
   // Start automatic cleanup interval

@@ -33,9 +33,7 @@ export function useTickers() {
     if (!isConnected || tickers.length === 0) return;
 
     // Subscribe to all tickers
-    //console.log('[useTickers] Subscribing to tickers:', tickers.map(t => t.symbol));
     tickers.forEach(ticker => {
-      //console.log(`[useTickers] Subscribing to ${ticker.symbol}`);
       subscribe(ticker.symbol);
     });
 
@@ -46,7 +44,6 @@ export function useTickers() {
       const price = event.ticker?.price || event.price;
       
       if (symbol && price) {
-        //console.log('Price update received:', symbol, '@', price);
         
         setTickers(prevTickers => 
           prevTickers.map(ticker => {

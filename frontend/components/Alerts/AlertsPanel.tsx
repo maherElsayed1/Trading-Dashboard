@@ -198,7 +198,7 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
         </div>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg transition-all transform hover:scale-105 shadow-lg"
+          className="px-4 py-3 sm:py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg transition-all transform hover:scale-105 shadow-lg min-h-[44px]"
         >
           {showCreateForm ? '✕ Cancel' : '+ New Alert'}
         </button>
@@ -210,65 +210,9 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
         </div>
       )}
 
-      {/* Quick Test Alert Buttons */}
-      <div className="mb-4 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-yellow-400">Quick Test Alerts</p>
-            <p className="text-xs text-gray-400">Create alerts that will trigger on next price update</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={async () => {
-                const ticker = tickers.find(t => t.symbol === 'AAPL') || tickers[0];
-                if (ticker) {
-                  try {
-                    // Create an alert that's guaranteed to trigger
-                    const testAlert = await apiService.createAlert(
-                      ticker.symbol,
-                      'above',
-                      ticker.price - 1  // Well below current price
-                    );
-                    // Test alert created
-                    setAlerts([...alerts, testAlert]);
-                  } catch (err) {
-                    // Failed to create test alert
-                  }
-                }
-              }}
-              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all"
-            >
-              Instant Above Alert
-            </button>
-            <button
-              onClick={async () => {
-                const ticker = tickers.find(t => t.symbol === 'BTC-USD') || tickers[1];
-                if (ticker) {
-                  try {
-                    // Create an alert that's guaranteed to trigger
-                    const testAlert = await apiService.createAlert(
-                      ticker.symbol,
-                      'below',
-                      ticker.price + 1000  // Well above current price
-                    );
-                    // Test alert created
-                    setAlerts([...alerts, testAlert]);
-                  } catch (err) {
-                    // Failed to create test alert
-                  }
-                }
-              }}
-              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-all"
-            >
-              Instant Below Alert
-            </button>
-          </div>
-        </div>
-      </div>
-
       {showCreateForm && (
-        <form onSubmit={handleCreateAlert} className="mb-6 p-5 bg-gradient-to-r from-gray-800/50 to-gray-800/30 rounded-xl border border-gray-700/50 backdrop-blur-sm">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <form onSubmit={handleCreateAlert} className="mb-6 p-4 sm:p-5 bg-gradient-to-r from-gray-800/50 to-gray-800/30 rounded-xl border border-gray-700/50 backdrop-blur-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <select
               value={selectedSymbol}
               onChange={(e) => setSelectedSymbol(e.target.value)}
@@ -304,7 +248,7 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
 
             <button
               type="submit"
-              className="px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-lg transition-all transform hover:scale-105 shadow-lg"
+              className="px-4 py-3 sm:py-2.5 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-lg transition-all transform hover:scale-105 shadow-lg min-h-[44px]"
             >
               ✓ Create Alert
             </button>
@@ -352,11 +296,11 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
                   <div className="absolute inset-0 bg-yellow-500/10 animate-pulse" />
                 )}
                 
-                <div className="relative p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                <div className="relative p-3 sm:p-4">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 flex-1">
                       {/* Symbol and Type Badge */}
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                           alert.type === 'above'
                             ? 'bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30'
@@ -367,10 +311,10 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
                           </span>
                         </div>
                         
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <span className="font-bold text-white text-lg">{alert.symbol}</span>
-                            <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-bold text-white text-base sm:text-lg">{alert.symbol}</span>
+                            <span className={`px-2 py-0.5 text-xs font-semibold rounded-full whitespace-nowrap ${
                               alert.type === 'above'
                                 ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
                                 : 'bg-red-500/20 text-red-300 border border-red-500/30'
@@ -379,29 +323,31 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
                             </span>
                           </div>
                     
-                          <p className="text-xs text-gray-400 mt-0.5">
+                          <p className="text-xs text-gray-400 mt-1">
                             Created {new Date(alert.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
                       
+                      {/* Price Information Section */}
                       {ticker && (
-                        <div className="flex items-center space-x-4 flex-1">
-                          {/* Current Price */}
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <div>
-                                <span className="text-xs text-gray-400">Current Price</span>
-                                <div className={`font-mono font-bold text-lg ${
-                                  willTrigger ? 'text-green-400' : 
-                                  isVeryClose ? 'text-yellow-400' : 
-                                  'text-white'
-                                }`}>
-                                  ${currentPrice.toFixed(2)}
-                                </div>
+                        <div className="flex-1 min-w-0 self-center">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {/* Current Price */}
+                            <div>
+                              <span className="text-xs text-gray-400 block">Current Price</span>
+                              <div className={`font-mono font-bold text-base sm:text-lg ${
+                                willTrigger ? 'text-green-400' : 
+                                isVeryClose ? 'text-yellow-400' : 
+                                'text-white'
+                              }`}>
+                                ${currentPrice.toFixed(2)}
                               </div>
-                              
-                              <div className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${
+                            </div>
+                            
+                            {/* Status Badge */}
+                            <div className="flex items-center justify-end">
+                              <div className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap ${
                                 willTrigger ? 'bg-green-500/20 text-green-400 border border-green-500/30 animate-pulse' :
                                 isVeryClose ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 animate-pulse' :
                                 isNearThreshold ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
@@ -411,34 +357,36 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
                                  `${percentAway.toFixed(1)}% away`}
                               </div>
                             </div>
-                            
-                            {/* Visual Progress Bar */}
-                            {!willTrigger && alert.active && (
-                              <div className="relative mt-2">
-                                <div className="flex justify-between mb-1">
-                                  <span className="text-xs text-gray-500">0%</span>
-                                  <span className="text-xs text-gray-500">Threshold</span>
-                                </div>
-                                <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden border border-gray-700/30">
-                                  <div 
-                                    className={`h-full transition-all duration-500 ${
-                                      isVeryClose ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 animate-pulse' :
-                                      isNearThreshold ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
-                                      'bg-gradient-to-r from-blue-500 to-blue-400'
-                                    }`}
-                                    style={{ 
-                                      width: `${Math.max(0, Math.min(100, 100 - percentAway))}%` 
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            )}
                           </div>
+                            
+                          
+                          {/* Visual Progress Bar */}
+                          {!willTrigger && alert.active && (
+                            <div className="relative mt-3 col-span-1 sm:col-span-2">
+                              <div className="flex justify-between mb-1">
+                                <span className="text-xs text-gray-500">0%</span>
+                                <span className="text-xs text-gray-500">Threshold</span>
+                              </div>
+                              <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden border border-gray-700/30">
+                                <div 
+                                  className={`h-full transition-all duration-500 ${
+                                    isVeryClose ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 animate-pulse' :
+                                    isNearThreshold ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
+                                    'bg-gradient-to-r from-blue-500 to-blue-400'
+                                  }`}
+                                  style={{ 
+                                    width: `${Math.max(0, Math.min(100, 100 - percentAway))}%` 
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 
+                      {/* Triggered Status Badge */}
                       {alert.triggeredAt && (
-                        <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-lg">
+                        <div className="flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg self-center ml-0 sm:ml-auto">
                           <span className="text-xs font-semibold text-green-400">✓ Triggered</span>
                           <span className="text-xs text-green-300">
                             {new Date(alert.triggeredAt).toLocaleTimeString()}
@@ -447,17 +395,17 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
                       )}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex items-center space-x-2">
+                    {/* Action Buttons - Responsive layout */}
+                    <div className="flex flex-row gap-2 lg:gap-2 self-start lg:self-center">
                       <button
                         onClick={() => handleToggleAlert(alert.id)}
-                        className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all transform hover:scale-105 ${
+                        className={`relative px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all transform hover:scale-105 min-h-[38px] sm:min-h-[44px] flex-1 lg:flex-none lg:min-w-[100px] ${
                           alert.active
                             ? 'bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg'
                             : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 border border-gray-700/50'
                         }`}
                       >
-                        <span className="flex items-center space-x-1">
+                        <span className="flex items-center justify-center gap-1">
                           {alert.active ? (
                             <>
                               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -474,10 +422,10 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
                       
                       <button
                         onClick={() => handleDeleteAlert(alert.id)}
-                        className="px-4 py-2 bg-gradient-to-r from-red-600/30 to-red-700/30 hover:from-red-600/50 hover:to-red-700/50 border border-red-500/30 hover:border-red-500/50 text-red-400 hover:text-red-300 text-sm font-medium rounded-lg transition-all transform hover:scale-105"
+                        className="px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-red-600/30 to-red-700/30 hover:from-red-600/50 hover:to-red-700/50 border border-red-500/30 hover:border-red-500/50 text-red-400 hover:text-red-300 text-xs sm:text-sm font-medium rounded-lg transition-all transform hover:scale-105 min-h-[38px] sm:min-h-[44px] flex-1 lg:flex-none lg:min-w-[100px]"
                       >
-                        <span className="flex items-center space-x-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span className="flex items-center justify-center gap-1">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                           <span>Delete</span>

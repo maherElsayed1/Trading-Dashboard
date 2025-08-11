@@ -1,14 +1,29 @@
-# Real-Time Trading Dashboard
+# 📊 Real-Time Trading Dashboard
 
-A modern, real-time trading dashboard built with Next.js and Node.js, featuring live price updates via WebSocket and interactive financial charts.
+A professional-grade real-time trading dashboard with WebSocket streaming, interactive charts, and price alerts. Built with modern web technologies demonstrating microservices architecture and real-time data visualization.
 
-## 🚀 Features
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)
+![React](https://img.shields.io/badge/React-19.0-blue.svg)
 
-- **Real-time Price Updates**: Live ticker prices streamed via WebSocket
-- **Interactive Charts**: Professional financial charts using TradingView Lightweight Charts
-- **Microservices Architecture**: Clean separation between frontend and backend
-- **TypeScript**: Full type safety across the stack
-- **Docker Support**: Containerized development and deployment
+## ✨ Features
+
+### Core Features
+- 📈 **Real-time Price Streaming** - WebSocket-based live price updates every 2 seconds
+- 📊 **Interactive Charts** - Professional TradingView-style candlestick charts with 15-second intervals
+- 🔔 **Price Alerts** - Set alerts above/below thresholds with sound and desktop notifications
+- 🔐 **Authentication** - JWT-based auth system with protected routes
+- 🎨 **Modern UI** - Glassmorphism design with smooth animations and gradients
+- 📱 **Responsive Design** - Mobile-first approach, works on all devices
+
+### Technical Features
+- **Microservices Architecture** - Separate frontend and backend services
+- **WebSocket Communication** - Bi-directional real-time data streaming
+- **TypeScript** - Full type safety across frontend and backend
+- **API Documentation** - Swagger/OpenAPI documentation
+- **Performance Optimized** - Lazy loading, code splitting, efficient re-renders
+- **Error Handling** - Graceful error recovery and user feedback
 
 ## 📊 Supported Tickers
 
@@ -52,6 +67,10 @@ trading-dashboard/
 ### Prerequisites
 - Node.js 18+ and npm
 - Docker and Docker Compose (optional)
+
+### Default Credentials
+- Email: `user@example.com`
+- Password: `password123`
 
 ### Installation
 
@@ -117,6 +136,13 @@ Visit **http://localhost:3001/api-docs** for interactive API documentation with:
 - WebSocket documentation
 
 ### REST API Endpoints
+
+#### Authentication
+- `POST /api/auth/login` - User login
+- `GET /api/auth/verify` - Verify JWT token
+- `POST /api/auth/logout` - User logout
+
+#### Market Data
 - `GET /api/health` - Health check
 - `GET /api/tickers` - List all tickers
 - `GET /api/tickers/:symbol` - Get ticker details
@@ -124,11 +150,23 @@ Visit **http://localhost:3001/api-docs** for interactive API documentation with:
 - `GET /api/market/status` - Market status
 - `POST /api/market/control` - Control simulation
 
+#### Alerts (Protected)
+- `GET /api/alerts` - Get user alerts
+- `POST /api/alerts` - Create new alert
+- `DELETE /api/alerts/:id` - Delete alert
+- `PATCH /api/alerts/:id/toggle` - Toggle alert
+
 ### WebSocket Events
-- `connection` - Initial connection
+
+#### Client → Server
 - `subscribe` - Subscribe to ticker updates
 - `unsubscribe` - Unsubscribe from ticker
+
+#### Server → Client
+- `connection` - Initial connection
 - `price_update` - Real-time price updates
+- `alert` - Alert notifications
+- `error` - Error messages
 
 ## 🧪 Testing
 

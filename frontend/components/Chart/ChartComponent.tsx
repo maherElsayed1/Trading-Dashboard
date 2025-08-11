@@ -110,6 +110,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
         textColor: '#9ca3af',
+        attributionLogo: false, // Remove TradingView logo from bottom left
       },
       grid: {
         vertLines: { color: '#1f2937' },
@@ -345,7 +346,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
   return (
     <div className="w-full bg-gray-900/50 rounded-lg border border-gray-800 p-4">
       {/* Chart Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
         <div className="flex items-center space-x-3">
           <div>
             <h3 className="text-lg font-bold text-white">{symbol} Chart</h3>
@@ -361,13 +362,13 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="flex items-center space-x-4">
+        {/* Controls - Stack on mobile */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
           {/* Chart Type Selector */}
-          <div className="flex items-center space-x-1 bg-gray-800 rounded-lg p-1">
+          <div className="flex items-center space-x-1 bg-gray-800 rounded-lg p-1 w-full sm:w-auto">
             <button
               onClick={() => setChartType('candlestick')}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 rounded text-xs sm:text-sm font-medium transition-colors ${
                 chartType === 'candlestick'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-400 hover:text-white'
@@ -377,7 +378,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
             </button>
             <button
               onClick={() => setChartType('line')}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 rounded text-xs sm:text-sm font-medium transition-colors ${
                 chartType === 'line'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-400 hover:text-white'
@@ -387,7 +388,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
             </button>
             <button
               onClick={() => setChartType('area')}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 rounded text-xs sm:text-sm font-medium transition-colors ${
                 chartType === 'area'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-400 hover:text-white'
@@ -397,13 +398,13 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
             </button>
           </div>
 
-          {/* Timeframe Selector */}
-          <div className="flex items-center space-x-1 bg-gray-800 rounded-lg p-1">
+          {/* Timeframe Selector - Scrollable on mobile */}
+          <div className="flex items-center overflow-x-auto space-x-1 bg-gray-800 rounded-lg p-1 w-full sm:w-auto">
             {(['1D', '1W', '1M', '3M', '1Y', 'ALL'] as Timeframe[]).map((tf) => (
               <button
                 key={tf}
                 onClick={() => handleTimeframeChange(tf)}
-                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                className={`flex-shrink-0 px-2 sm:px-3 py-1.5 rounded text-xs sm:text-sm font-medium transition-colors ${
                   timeframe === tf
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-400 hover:text-white'
@@ -426,16 +427,16 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
         <div ref={chartContainerRef} className="w-full" />
       </div>
 
-      {/* Chart Legend */}
-      <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
-        <div className="flex items-center space-x-4">
+      {/* Chart Legend - Responsive */}
+      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-gray-500">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           <span>O: {data[data.length - 1]?.open.toFixed(2)}</span>
           <span>H: {data[data.length - 1]?.high.toFixed(2)}</span>
           <span>L: {data[data.length - 1]?.low.toFixed(2)}</span>
           <span>C: {data[data.length - 1]?.close.toFixed(2)}</span>
         </div>
         <div>
-          Volume: {data[data.length - 1]?.volume.toLocaleString()}
+          Vol: {data[data.length - 1]?.volume.toLocaleString()}
         </div>
       </div>
     </div>
