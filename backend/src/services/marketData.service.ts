@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import { WebSocket } from 'ws';
 import { TickerModel } from '../models/ticker.model';
 import { PriceUpdate, WSMessage, WSMessageType } from '../../../shared/types/ticker.types';
+import { logger } from '../utils/logger';
 
 export class MarketDataService extends EventEmitter {
   private tickerModel: TickerModel;
@@ -29,7 +30,7 @@ export class MarketDataService extends EventEmitter {
       return; // Already running
     }
 
-    console.log('📈 Starting market simulation...');
+    logger.info('Starting market simulation...');
     
     this.updateInterval = setInterval(() => {
       if (this.isMarketOpen) {
@@ -42,7 +43,7 @@ export class MarketDataService extends EventEmitter {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
-      console.log('📉 Market simulation stopped');
+      logger.info('Market simulation stopped');
     }
   }
 
@@ -98,7 +99,7 @@ export class MarketDataService extends EventEmitter {
   subscribe(symbol: string, ws: WebSocket): boolean {
     const subscribers = this.subscribers.get(symbol);
     if (!subscribers) {
-      console.warn(`Invalid ticker symbol: ${symbol}`);
+      logger.warn(`Invalid ticker symbol: ${symbol}`);
       return false;
     }
 
@@ -176,7 +177,7 @@ export class MarketDataService extends EventEmitter {
 
   setMarketOpen(isOpen: boolean): void {
     this.isMarketOpen = isOpen;
-    console.log(`Market is now ${isOpen ? 'OPEN' : 'CLOSED'}`);
+    logger.info(`Market is now ${isOpen ? 'OPEN' : 'CLOSED'}`);
   }
 
   getMarketStatus() {

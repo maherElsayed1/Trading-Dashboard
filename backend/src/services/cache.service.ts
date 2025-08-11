@@ -58,7 +58,6 @@ class CacheService {
 
   // Clear all cache entries
   clear(): void {
-    const size = this.cache.size;
     this.cache.clear();
   }
 

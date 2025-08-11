@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { MarketDataService } from '../services/marketData.service';
 import { cacheService, cacheKeys } from '../services/cache.service';
+import { logger } from '../utils/logger';
 
 export function createTickerRoutes(marketDataService: MarketDataService): Router {
   const router = Router();
@@ -46,7 +47,7 @@ export function createTickerRoutes(marketDataService: MarketDataService): Router
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Error fetching tickers:', error);
+      logger.error('Error fetching tickers:', error);
       res.status(500).json({
         success: false,
         error: 'Failed to fetch tickers',
@@ -110,7 +111,7 @@ export function createTickerRoutes(marketDataService: MarketDataService): Router
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error(`Error fetching ticker ${req.params.symbol}:`, error);
+      logger.error(`Error fetching ticker ${req.params.symbol}:`, error);
       res.status(500).json({
         success: false,
         error: 'Failed to fetch ticker',
@@ -234,7 +235,7 @@ export function createTickerRoutes(marketDataService: MarketDataService): Router
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error(`Error fetching historical data for ${req.params.symbol}:`, error);
+      logger.error(`Error fetching historical data for ${req.params.symbol}:`, error);
       res.status(500).json({
         success: false,
         error: 'Failed to fetch historical data',
@@ -277,7 +278,7 @@ export function createTickerRoutes(marketDataService: MarketDataService): Router
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Error fetching market status:', error);
+      logger.error('Error fetching market status:', error);
       res.status(500).json({
         success: false,
         error: 'Failed to fetch market status',
@@ -373,7 +374,7 @@ export function createTickerRoutes(marketDataService: MarketDataService): Router
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Error controlling market:', error);
+      logger.error('Error controlling market:', error);
       res.status(500).json({
         success: false,
         error: 'Failed to control market',

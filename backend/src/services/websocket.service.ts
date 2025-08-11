@@ -2,6 +2,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { Server as HTTPServer } from 'http';
 import { MarketDataService } from './marketData.service';
 import { WSMessage, WSMessageType, SubscribeMessage, UnsubscribeMessage } from '../../../shared/types/ticker.types';
+import { logger } from '../utils/logger';
 
 export class WebSocketService {
   private wss: WebSocketServer;
@@ -23,11 +24,11 @@ export class WebSocketService {
     // Start heartbeat to detect stale connections
     this.startHeartbeat();
     
-    console.log('🔌 WebSocket service initialized');
+    logger.info('WebSocket service initialized');
   }
 
   private handleConnection(ws: WebSocket): void {
-    console.log('New WebSocket connection established');
+    logger.info('New WebSocket connection established');
     
     // Initialize client subscription tracking
     this.clients.set(ws, new Set());
@@ -73,7 +74,7 @@ export class WebSocketService {
           this.sendError(ws, `Unknown message type: ${message.type}`);
       }
     } catch (error) {
-      console.error('Error parsing message:', error);
+      logger.error('Error parsing message:', error);
       this.sendError(ws, 'Invalid message format');
     }
   }
@@ -86,7 +87,7 @@ export class WebSocketService {
     const clientSubscriptions = this.clients.get(ws);
     
     if (!clientSubscriptions) {
-      console.error('Client not found in subscription tracking');
+      logger.error('Client not found in subscription tracking');
       return;
     }
     
@@ -176,7 +177,7 @@ export class WebSocketService {
   }
 
   private handleError(ws: WebSocket, error: Error): void {
-    console.error('WebSocket error:', error);
+    logger.error('WebSocket error:', error);
     this.sendError(ws, 'Connection error occurred');
   }
 

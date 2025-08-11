@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.routes';
 import alertsRoutes from './routes/alerts.routes';
 import { cacheService } from './services/cache.service';
 import { alertsService } from './services/alerts.service';
+import { logger } from './utils/logger';
 
 // Load environment variables
 dotenv.config();
@@ -110,7 +111,7 @@ app.use((req: Request, res: Response) => {
 
 // Error handler
 app.use((err: any, _req: Request, res: Response, _next: any) => {
-  console.error('Server error:', err);
+  logger.error('Server error:', err);
   res.status(500).json({
     success: false,
     error: 'Internal server error',
@@ -143,29 +144,28 @@ alertsService.on('alert-triggered', (event) => {
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully...');
+  logger.info('SIGTERM received, shutting down gracefully...');
   marketDataService.stopMarketSimulation();
   websocketService.shutdown();
   server.close(() => {
-    console.log('Server closed');
+    logger.info('Server closed');
     process.exit(0);
   });
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully...');
+  logger.info('SIGINT received, shutting down gracefully...');
   marketDataService.stopMarketSimulation();
   websocketService.shutdown();
   server.close(() => {
-    console.log('Server closed');
+    logger.info('Server closed');
     process.exit(0);
   });
 });
 
 // Start server
 server.listen(PORT, () => {
-  console.log(`
-🚀 Trading Dashboard Backend Started
+  logger.info(`Trading Dashboard Backend Started
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📍 Server: http://localhost:${PORT}
 📚 API Docs: http://localhost:${PORT}/api-docs

@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
 import { Ticker } from '../../../shared/types/ticker.types';
+import { logger } from '../utils/logger';
 
 export interface PriceAlert {
   id: string;
@@ -67,7 +68,7 @@ class AlertsService extends EventEmitter {
 
     userAlerts.splice(index, 1);
     this.alerts.set(userId, userAlerts);
-    console.log(`🗑️ Alert deleted: ${alertId}`);
+    logger.info(`Alert deleted: ${alertId}`);
     return true;
   }
 
@@ -80,7 +81,7 @@ class AlertsService extends EventEmitter {
     if (!alert) return null;
 
     alert.active = !alert.active;
-    console.log(`🔄 Alert ${alertId} is now ${alert.active ? 'active' : 'inactive'}`);
+    logger.info(`Alert ${alertId} is now ${alert.active ? 'active' : 'inactive'}`);
     return alert;
   }
 
@@ -108,7 +109,7 @@ class AlertsService extends EventEmitter {
           message: `🚨 Alert: ${ticker.symbol} is now ${alert.type} ${alert.threshold} at ${ticker.price.toFixed(2)}`
         };
         
-        console.log(`🚨 Alert triggered: ${alert.id} - ${ticker.symbol} ${alert.type} ${alert.threshold}`);
+        logger.info(`Alert triggered: ${alert.id} - ${ticker.symbol} ${alert.type} ${alert.threshold}`);
         
         this.emit('alert-triggered', eventData);
       }

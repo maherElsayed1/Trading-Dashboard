@@ -129,7 +129,7 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.5);
     } catch (error) {
-      console.error('Could not play alert sound:', error);
+      // Could not play alert sound - silently handle
     }
   };
 

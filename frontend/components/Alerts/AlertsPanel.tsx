@@ -172,7 +172,7 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
       const updatedAlert = await apiService.toggleAlert(alertId);
       setAlerts(alerts.map(a => a.id === alertId ? updatedAlert : a));
     } catch (err) {
-      console.error('Toggle alert error:', err);
+      // Toggle alert error - silently handle
       setError('Failed to toggle alert');
     }
   };
