@@ -21,8 +21,9 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["node", "jest"]
+    "types": ["node", "jest", "supertest"],
+    "typeRoots": ["./node_modules/@types", "./tests"]
   },
-  "include": ["src/**/*", "../shared/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "include": ["src/**/*", "../shared/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

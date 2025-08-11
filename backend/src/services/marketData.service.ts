@@ -189,3 +189,6 @@ export class MarketDataService extends EventEmitter {
     };
   }
 }
+
+// Export singleton instance
+export const marketDataService = new MarketDataService();

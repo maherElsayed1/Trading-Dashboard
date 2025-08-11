@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 import { Ticker } from '../../../shared/types/ticker.types';
 import { logger } from '../utils/logger';
 
@@ -13,7 +13,7 @@ export interface PriceAlert {
   createdAt: string;
 }
 
-class AlertsService extends EventEmitter {
+export class AlertsService extends EventEmitter {
   private alerts: Map<string, PriceAlert[]> = new Map();
   private alertIdCounter = 1;
 

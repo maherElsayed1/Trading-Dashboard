@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
 // Mock JWT secret - in production, use environment variable
 const JWT_SECRET = process.env.JWT_SECRET || 'mock-secret-key-for-development';
