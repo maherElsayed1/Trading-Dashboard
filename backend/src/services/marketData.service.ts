@@ -83,7 +83,7 @@ export class MarketDataService extends EventEmitter {
 
     const messageStr = JSON.stringify(message);
     
-    console.log(`📊 Broadcasting price update for ${symbol}: $${ticker.price.toFixed(2)} to ${subscribers.size} subscribers`);
+    // Broadcasting price update
     
     subscribers.forEach(ws => {
       if (ws.readyState === WebSocket.OPEN) {
@@ -103,7 +103,7 @@ export class MarketDataService extends EventEmitter {
     }
 
     subscribers.add(ws);
-    console.log(`Client subscribed to ${symbol}. Total subscribers: ${subscribers.size}`);
+    // Client subscribed
     
     // Send current price immediately
     const ticker = this.tickerModel.getTicker(symbol);
@@ -137,17 +137,17 @@ export class MarketDataService extends EventEmitter {
 
     const removed = subscribers.delete(ws);
     if (removed) {
-      console.log(`Client unsubscribed from ${symbol}. Remaining subscribers: ${subscribers.size}`);
+      // Client unsubscribed
     }
     
     return removed;
   }
 
   unsubscribeAll(ws: WebSocket): void {
-    this.subscribers.forEach((subscriberSet, symbol) => {
+    this.subscribers.forEach((subscriberSet) => {
       if (subscriberSet.has(ws)) {
         subscriberSet.delete(ws);
-        console.log(`Client removed from ${symbol} subscribers`);
+        // Client removed from subscribers
       }
     });
   }

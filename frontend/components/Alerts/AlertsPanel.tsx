@@ -25,6 +25,7 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasFetchedAlerts, setHasFetchedAlerts] = useState(false);
 
   // Form state
   const [selectedSymbol, setSelectedSymbol] = useState('');
@@ -37,50 +38,86 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
     }
   }, [isAuthenticated]);
 
-  // Add demo alerts in a separate effect
+  // Create demo alerts through API on first load (only if no existing alerts)
   useEffect(() => {
-    if (isAuthenticated && alerts.length === 0 && tickers.length > 0) {
-      const timer = setTimeout(() => {
-        const demoAlerts: Alert[] = [
-          {
-            id: 'demo-1',
-            symbol: 'AAPL',
-            type: 'above',
-            threshold: 185.00,
-            active: true,
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: 'demo-2',
-            symbol: 'BTC-USD',
-            type: 'below',
-            threshold: 44000,
-            active: true,
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: 'demo-3',
-            symbol: 'TSLA',
-            type: 'above',
-            threshold: 255.00,
-            active: false,
-            createdAt: new Date().toISOString(),
-          },
-        ];
-        setAlerts(demoAlerts);
-      }, 1000);
-      
+    if (isAuthenticated && hasFetchedAlerts && alerts.length === 0 && tickers.length > 0) {
+      const createDemoAlerts = async () => {
+        try {
+          // Create demo alerts that will trigger soon
+          
+          // Create a few demo alerts through the API
+          const appleTicker = tickers.find(t => t.symbol === 'AAPL');
+          const btcTicker = tickers.find(t => t.symbol === 'BTC-USD');
+          const tslaTicker = tickers.find(t => t.symbol === 'TSLA');
+
+          const demoAlerts = [];
+          
+          // Create alerts with very close thresholds that will trigger within seconds
+          // Since prices fluctuate by ~0.5-2% every 2 seconds, these should trigger quickly
+          if (appleTicker) {
+            // Create both above and below alerts with tight thresholds
+            const alert1 = await apiService.createAlert(
+              'AAPL',
+              'above',
+              appleTicker.price + 0.01  // Very close - will trigger on any upward movement
+            );
+            demoAlerts.push(alert1);
+            // AAPL alert created
+            
+            const alert2 = await apiService.createAlert(
+              'AAPL',
+              'below',
+              appleTicker.price - 0.01  // Very close - will trigger on any downward movement
+            );
+            demoAlerts.push(alert2);
+            // AAPL alert created
+          }
+
+          if (btcTicker) {
+            // BTC has higher volatility, so use slightly larger thresholds
+            const alert3 = await apiService.createAlert(
+              'BTC-USD',
+              'above',
+              btcTicker.price + 10  // Small threshold for crypto
+            );
+            demoAlerts.push(alert3);
+            // BTC alert created
+          }
+
+          if (tslaTicker) {
+            const alert4 = await apiService.createAlert(
+              'TSLA',
+              'below',
+              tslaTicker.price - 0.05  // Very close threshold
+            );
+            demoAlerts.push(alert4);
+            // TSLA alert created
+          }
+
+          if (demoAlerts.length > 0) {
+            setAlerts(demoAlerts);
+            // Demo alerts created
+          }
+        } catch (err) {
+          // Demo alerts creation failed
+        }
+      };
+
+      // Create alerts after a short delay to ensure everything is loaded
+      const timer = setTimeout(createDemoAlerts, 2000);
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, alerts.length, tickers.length]);
+  }, [isAuthenticated, hasFetchedAlerts, alerts.length, tickers]);
 
   const fetchAlerts = async () => {
     try {
       setIsLoading(true);
       const data = await apiService.getAlerts();
       setAlerts(data);
+      setHasFetchedAlerts(true);
     } catch {
       setError('Failed to fetch alerts');
+      setHasFetchedAlerts(true); // Set even on error to allow demo alerts
     } finally {
       setIsLoading(false);
     }
@@ -106,6 +143,13 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
   };
 
   const handleDeleteAlert = async (alertId: string) => {
+    // Check if it's a demo alert
+    if (alertId.startsWith('demo-')) {
+      // Just remove from state for demo alerts
+      setAlerts(alerts.filter(a => a.id !== alertId));
+      return;
+    }
+
     try {
       await apiService.deleteAlert(alertId);
       setAlerts(alerts.filter(a => a.id !== alertId));
@@ -115,10 +159,20 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
   };
 
   const handleToggleAlert = async (alertId: string) => {
+    // Check if it's a demo alert
+    if (alertId.startsWith('demo-')) {
+      // Just toggle in state for demo alerts
+      setAlerts(alerts.map(a => 
+        a.id === alertId ? { ...a, active: !a.active } : a
+      ));
+      return;
+    }
+
     try {
       const updatedAlert = await apiService.toggleAlert(alertId);
       setAlerts(alerts.map(a => a.id === alertId ? updatedAlert : a));
-    } catch {
+    } catch (err) {
+      console.error('Toggle alert error:', err);
       setError('Failed to toggle alert');
     }
   };
@@ -155,6 +209,62 @@ export const AlertsPanel: React.FC<AlertsPanelProps> = ({ tickers }) => {
           {error}
         </div>
       )}
+
+      {/* Quick Test Alert Buttons */}
+      <div className="mb-4 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-yellow-400">Quick Test Alerts</p>
+            <p className="text-xs text-gray-400">Create alerts that will trigger on next price update</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                const ticker = tickers.find(t => t.symbol === 'AAPL') || tickers[0];
+                if (ticker) {
+                  try {
+                    // Create an alert that's guaranteed to trigger
+                    const testAlert = await apiService.createAlert(
+                      ticker.symbol,
+                      'above',
+                      ticker.price - 1  // Well below current price
+                    );
+                    // Test alert created
+                    setAlerts([...alerts, testAlert]);
+                  } catch (err) {
+                    // Failed to create test alert
+                  }
+                }
+              }}
+              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all"
+            >
+              Instant Above Alert
+            </button>
+            <button
+              onClick={async () => {
+                const ticker = tickers.find(t => t.symbol === 'BTC-USD') || tickers[1];
+                if (ticker) {
+                  try {
+                    // Create an alert that's guaranteed to trigger
+                    const testAlert = await apiService.createAlert(
+                      ticker.symbol,
+                      'below',
+                      ticker.price + 1000  // Well above current price
+                    );
+                    // Test alert created
+                    setAlerts([...alerts, testAlert]);
+                  } catch (err) {
+                    // Failed to create test alert
+                  }
+                }
+              }}
+              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-all"
+            >
+              Instant Below Alert
+            </button>
+          </div>
+        </div>
+      </div>
 
       {showCreateForm && (
         <form onSubmit={handleCreateAlert} className="mb-6 p-5 bg-gradient-to-r from-gray-800/50 to-gray-800/30 rounded-xl border border-gray-700/50 backdrop-blur-sm">

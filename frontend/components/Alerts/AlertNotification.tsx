@@ -33,15 +33,27 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
     }
   }, []);
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
 
+  useEffect(() => {
+    // Always listen for WebSocket alerts, regardless of authentication
+    // We'll check authentication when displaying
+    // Set up WebSocket alert listener
+    
     // Listen for alert events from WebSocket
     const handleAlertTriggered = (event: any) => {
+      // console.log('[AlertNotification] WebSocket alert event received:', event);
+      
+      // Only process if authenticated
+      if (!isAuthenticated) {
+        // Skipping alert - not authenticated
+        return;
+      }
+      
       const data = event.data;
       
       // Handle backend alert format
       if (data && data.alert) {
+        // Process alert data
         const alert = data.alert;
         const ticker = data.ticker || tickers.find(t => t.symbol === alert.symbol);
         
@@ -56,14 +68,23 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
             message: data.message || `${alert.symbol} is now ${alert.type} $${alert.threshold.toFixed(2)} at $${ticker.price.toFixed(2)}`
           };
 
-          setNotifications(prev => [notification, ...prev].slice(0, 5)); // Keep last 5 notifications
+          // Create WebSocket notification
+          setNotifications(prev => {
+            const newNotifications = [notification, ...prev].slice(0, 5);
+            // Updated notifications after WebSocket alert
+            return newNotifications;
+          });
           
           // Play sound notification
           playAlertSound();
           
           // Show browser notification if permitted
           showBrowserNotification(notification.message);
+        } else {
+          // Could not find ticker for alert
         }
+      } else {
+        // Alert event data format not recognized
       }
     };
 
@@ -71,55 +92,13 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
     websocketService.on('alert', handleAlertTriggered);
 
     return () => {
+      // Clean up WebSocket alert listener
       websocketService.off('alert', handleAlertTriggered);
     };
-  }, [isAuthenticated, tickers]);
+  }, [isAuthenticated, tickers]); // Keep dependencies for proper updates
 
-  // Simulate alerts for demonstration
-  useEffect(() => {
-    if (!isAuthenticated || tickers.length === 0) return;
-
-    // Create demo alerts after 5 seconds
-    const demoTimeout = setTimeout(() => {
-      const appleTicker = tickers.find(t => t.symbol === 'AAPL');
-      if (appleTicker) {
-        const demoAlert: TriggeredAlert = {
-          id: 'demo-1',
-          symbol: 'AAPL',
-          type: 'above',
-          threshold: appleTicker.price - 1,
-          currentPrice: appleTicker.price,
-          timestamp: new Date().toISOString(),
-          message: `🎯 DEMO: AAPL crossed above $${(appleTicker.price - 1).toFixed(2)} - Current: $${appleTicker.price.toFixed(2)}`
-        };
-        setNotifications([demoAlert]);
-        playAlertSound();
-      }
-    }, 5000);
-
-    // Create another demo alert after 10 seconds
-    const demoTimeout2 = setTimeout(() => {
-      const btcTicker = tickers.find(t => t.symbol === 'BTC-USD');
-      if (btcTicker) {
-        const demoAlert: TriggeredAlert = {
-          id: 'demo-2',
-          symbol: 'BTC-USD',
-          type: 'below',
-          threshold: btcTicker.price + 1000,
-          currentPrice: btcTicker.price,
-          timestamp: new Date().toISOString(),
-          message: `📉 DEMO: BTC-USD dropped below $${(btcTicker.price + 1000).toFixed(2)} - Current: $${btcTicker.price.toFixed(2)}`
-        };
-        setNotifications(prev => [demoAlert, ...prev].slice(0, 5));
-        playAlertSound();
-      }
-    }, 10000);
-
-    return () => {
-      clearTimeout(demoTimeout);
-      clearTimeout(demoTimeout2);
-    };
-  }, [isAuthenticated, tickers]);
+  // Remove demo notifications - they interfere with real alerts
+  // Real alerts from the backend will be used instead
 
   const playAlertSound = () => {
     // Create a simple beep sound using Web Audio API
@@ -172,12 +151,14 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  if (!isAuthenticated || notifications.length === 0) return null;
+  if (!isAuthenticated) return null;
+
+  // Render notification panel
 
   return (
     <>
       {/* Floating Notification Panel */}
-      {showNotifications && (
+      {showNotifications && notifications.length > 0 ? (
         <div className="fixed top-20 right-4 z-50 w-[420px] space-y-3">
           {notifications.map((notification, index) => {
             const priceChange = notification.currentPrice - notification.threshold;
@@ -332,7 +313,7 @@ export const AlertNotification: React.FC<AlertNotificationProps> = ({ tickers })
             </div>
           )}
         </div>
-      )}
+      ) : null}
 
       {/* Toggle Button */}
       {notifications.length > 0 && !showNotifications && (

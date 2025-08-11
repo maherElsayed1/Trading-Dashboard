@@ -81,7 +81,7 @@ export class WebSocketService {
   private handleSubscribe(ws: WebSocket, message: any): void {
     // Handle both formats: { symbols: [...] } and { data: { symbols: [...] } }
     const symbols = message.symbols || message.data?.symbols || [];
-    console.log('Received subscription request for symbols:', symbols);
+    // Process subscription request
     
     const clientSubscriptions = this.clients.get(ws);
     
@@ -98,10 +98,10 @@ export class WebSocketService {
       if (success) {
         clientSubscriptions.add(symbol);
         results.push({ symbol, status: 'subscribed' });
-        console.log(`✅ Client subscribed to ${symbol}`);
+        // Client subscribed
       } else {
         results.push({ symbol, status: 'failed', reason: 'Invalid symbol' });
-        console.log(`❌ Failed to subscribe to ${symbol}`);
+        // Failed to subscribe
       }
     });
     
@@ -166,7 +166,7 @@ export class WebSocketService {
   }
 
   private handleDisconnect(ws: WebSocket): void {
-    console.log('WebSocket connection closed');
+    // WebSocket connection closed
     
     // Unsubscribe from all tickers
     this.marketDataService.unsubscribeAll(ws);
@@ -218,13 +218,15 @@ export class WebSocketService {
     };
 
     // Broadcast to all connected clients
+    let sentCount = 0;
     this.wss.clients.forEach((ws) => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(alertMessage));
+        sentCount++;
       }
     });
 
-    console.log(`📢 Alert broadcast to ${this.wss.clients.size} clients`);
+    // Alert broadcast complete
   }
 
   public getConnectionStats() {

@@ -245,7 +245,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
         // Initialize or update candle
         if (!currentCandleRef.current || currentCandleRef.current.time < currentPeriod) {
           // Need a new candle
-          console.log(`[NEW CANDLE] ${new Date(currentPeriod * 1000).toLocaleTimeString()} | Price: ${currentPrice.toFixed(2)}`);
+          // New candle created
           
           currentCandleRef.current = {
             time: currentPeriod,
@@ -265,7 +265,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
               close: currentPrice,
             });
           } catch (err) {
-            console.error('[ERROR] Adding new candle:', err);
+            // Error adding new candle
           }
           
         } else if (currentCandleRef.current.time === currentPeriod) {
@@ -282,8 +282,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
           if (oldHigh !== currentCandleRef.current.high || 
               oldLow !== currentCandleRef.current.low || 
               oldClose !== currentCandleRef.current.close) {
-            const timeLeft = candleInterval - (now - currentPeriod);
-            console.log(`[UPDATE] ${timeLeft}s left | Price: ${currentPrice.toFixed(2)} | H:${currentCandleRef.current.high.toFixed(2)} L:${currentCandleRef.current.low.toFixed(2)}`);
+            // Update existing candle
             
             try {
               seriesRef.current.update({
@@ -294,7 +293,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
                 close: currentCandleRef.current.close,
               });
             } catch (err) {
-              console.error('[ERROR] Updating candle:', err);
+              // Error updating candle
             }
           }
         }

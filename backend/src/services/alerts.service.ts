@@ -36,7 +36,7 @@ class AlertsService extends EventEmitter {
     userAlerts.push(alert);
     this.alerts.set(userId, userAlerts);
 
-    console.log(`📢 Alert created: ${alert.id} for ${symbol} ${type} ${threshold}`);
+    // Alert created
     return alert;
   }
 
@@ -102,13 +102,15 @@ class AlertsService extends EventEmitter {
         triggeredAlerts.push(alert);
 
         // Emit alert event for backend handling
-        this.emit('alert-triggered', {
+        const eventData = {
           alert,
           ticker,
           message: `🚨 Alert: ${ticker.symbol} is now ${alert.type} ${alert.threshold} at ${ticker.price.toFixed(2)}`
-        });
-
+        };
+        
         console.log(`🚨 Alert triggered: ${alert.id} - ${ticker.symbol} ${alert.type} ${alert.threshold}`);
+        
+        this.emit('alert-triggered', eventData);
       }
     }
 
