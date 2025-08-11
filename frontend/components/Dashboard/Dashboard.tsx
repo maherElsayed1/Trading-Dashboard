@@ -20,6 +20,13 @@ export const Dashboard: React.FC = () => {
   const [selectedTicker, setSelectedTicker] = useState<Ticker | null>(null);
   const { data: historicalData } = useHistoricalData(selectedTicker?.symbol || null);
 
+  // Set first ticker as selected by default
+  React.useEffect(() => {
+    if (!selectedTicker && tickers.length > 0) {
+      setSelectedTicker(tickers[0]);
+    }
+  }, [tickers, selectedTicker]);
+
   // Update selected ticker when it changes in the tickers array (real-time updates)
   React.useEffect(() => {
     if (selectedTicker && tickers.length > 0) {
@@ -90,6 +97,9 @@ export const Dashboard: React.FC = () => {
           </div>
         )}
 
+        {/* Alerts Panel - Moved above chart */}
+        <AlertsPanel tickers={tickers} />
+
         {/* Chart Section */}
         {selectedTicker && (
           <div className="space-y-4">
@@ -130,9 +140,6 @@ export const Dashboard: React.FC = () => {
             )}
           </div>
         )}
-
-        {/* Alerts Panel */}
-        <AlertsPanel tickers={tickers} />
 
         {/* Ticker List */}
         <TickerList

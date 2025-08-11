@@ -45,7 +45,11 @@ const router = Router();
  *                         type: string
  */
 router.get('/', authenticateToken, (req: AuthRequest, res) => {
-  const userId = req.user!.id;
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'User not authenticated' });
+    return;
+  }
+  const userId = req.user.id;
   const alerts = alertsService.getUserAlerts(userId);
 
   res.json({
@@ -89,7 +93,11 @@ router.get('/', authenticateToken, (req: AuthRequest, res) => {
  *         description: Alert created successfully
  */
 router.post('/', authenticateToken, (req: AuthRequest, res) => {
-  const userId = req.user!.id;
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'User not authenticated' });
+    return;
+  }
+  const userId = req.user.id;
   const { symbol, type, threshold } = req.body;
 
   if (!symbol || !type || threshold === undefined) {
@@ -136,7 +144,11 @@ router.post('/', authenticateToken, (req: AuthRequest, res) => {
  *         description: Alert deleted successfully
  */
 router.delete('/:alertId', authenticateToken, (req: AuthRequest, res) => {
-  const userId = req.user!.id;
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'User not authenticated' });
+    return;
+  }
+  const userId = req.user.id;
   const { alertId } = req.params;
 
   const deleted = alertsService.deleteAlert(userId, alertId);
@@ -174,7 +186,11 @@ router.delete('/:alertId', authenticateToken, (req: AuthRequest, res) => {
  *         description: Alert toggled successfully
  */
 router.patch('/:alertId/toggle', authenticateToken, (req: AuthRequest, res) => {
-  const userId = req.user!.id;
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'User not authenticated' });
+    return;
+  }
+  const userId = req.user.id;
   const { alertId } = req.params;
 
   const alert = alertsService.toggleAlert(userId, alertId);
@@ -215,7 +231,11 @@ router.get('/stats', (_req, res) => {
 
 // Test endpoint to trigger demo alerts
 router.post('/test-trigger', authenticateToken, (req: AuthRequest, res) => {
-  const userId = req.user!.id;
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'User not authenticated' });
+    return;
+  }
+  const userId = req.user.id;
   
   // Get current AAPL ticker
   const currentTicker = marketDataService.getTicker('AAPL');
