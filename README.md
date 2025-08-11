@@ -36,6 +36,23 @@ A professional-grade real-time trading dashboard with WebSocket streaming, inter
 - AMZN (Amazon.com Inc.)
 - SPY (S&P 500 ETF)
 
+## 📸 Screenshots
+
+### Dashboard Overview
+![Dashboard Overview](docs/images/image.png)
+
+### Real-time Price Updates
+![Real-time Price Updates](docs/images/image2.png)
+
+### Interactive Charts
+![Interactive Charts](docs/images/image3.png)
+
+### Price Alerts
+![Price Alerts](docs/images/image4.png)
+
+### Authentication & User Interface
+![Authentication & User Interface](docs/images/image5.png)
+
 ## 🏗️ Architecture
 
 ```
