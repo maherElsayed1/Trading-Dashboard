@@ -73,6 +73,13 @@ trading-dashboard/
 - **Express.js** - Web framework
 - **WebSocket (ws)** - Real-time communication
 - **TypeScript** - Type safety
+- **Jest** - Testing framework
+- **Swagger** - API documentation
+
+### DevOps
+- **Docker** - Containerization
+- **Docker Compose** - Multi-container orchestration
+- **GitHub Actions** - CI/CD (ready for setup)
 
 ## 🚀 Getting Started
 
@@ -204,8 +211,9 @@ npm test
 ## 📝 Documentation
 
 - [Project Status](PROJECT_STATUS.md) - Current development progress
+- [Deployment Guide](docs/DEPLOYMENT.md) - Complete deployment instructions
 - [AI Assistant Guide](CLAUDE.md) - Context for AI development
-- [API Documentation](docs/api.md) - Detailed API specs
+- [API Documentation](http://localhost:3001/api-docs) - Interactive Swagger UI
 - [Requirements](docs/instructions.md) - Original project requirements
 
 ## 🤝 Contributing
