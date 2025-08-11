@@ -7,6 +7,10 @@ import { MarketDataService } from './services/marketData.service';
 import { WebSocketService } from './services/websocket.service';
 import { createTickerRoutes } from './routes/ticker.routes';
 import { swaggerSpec } from './config/swagger';
+import authRoutes from './routes/auth.routes';
+import alertsRoutes from './routes/alerts.routes';
+import { cacheService } from './services/cache.service';
+import { alertsService } from './services/alerts.service';
 
 // Load environment variables
 dotenv.config();
@@ -91,6 +95,8 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 // API Routes
 app.use('/api', createTickerRoutes(marketDataService));
+app.use('/api/auth', authRoutes);
+app.use('/api/alerts', alertsRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
@@ -121,6 +127,19 @@ const websocketService = new WebSocketService(server, marketDataService);
 
 // Start market simulation automatically
 marketDataService.startMarketSimulation();
+
+// Start cache cleanup interval (every minute)
+cacheService.startAutoCleanup(60000);
+
+// Subscribe to market updates for alert checking
+marketDataService.on('price-update', (ticker) => {
+  alertsService.checkAlerts(ticker);
+});
+
+// Broadcast alert events through WebSocket
+alertsService.on('alert-triggered', (event) => {
+  websocketService.broadcastAlert(event);
+});
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
@@ -162,6 +181,17 @@ Available endpoints:
   GET  /api/tickers/:symbol/history
   GET  /api/market/status
   POST /api/market/control
+  
+  Authentication:
+  POST /api/auth/login
+  GET  /api/auth/verify
+  POST /api/auth/logout
+  
+  Alerts (requires auth):
+  GET  /api/alerts
+  POST /api/alerts
+  DELETE /api/alerts/:id
+  PATCH /api/alerts/:id/toggle
   
 📖 Visit http://localhost:${PORT}/api-docs for interactive API documentation
   `);

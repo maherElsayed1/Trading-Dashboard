@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { MarketDataService } from '../services/marketData.service';
+import { cacheService, cacheKeys } from '../services/cache.service';
 
 export function createTickerRoutes(marketDataService: MarketDataService): Router {
   const router = Router();
@@ -185,7 +186,24 @@ export function createTickerRoutes(marketDataService: MarketDataService): Router
     try {
       const { symbol } = req.params;
       const { days = 30, interval = 'daily' } = req.query;
+      const daysLimit = Math.min(parseInt(days as string) || 30, 30);
       
+      // Check cache first
+      const cacheKey = cacheKeys.tickerHistory(symbol.toUpperCase(), daysLimit);
+      const cachedData = cacheService.get(cacheKey);
+      
+      if (cachedData) {
+        res.json({
+          success: true,
+          data: cachedData,
+          count: (cachedData as any).dataPoints.length,
+          timestamp: new Date().toISOString(),
+          cached: true
+        });
+        return;
+      }
+      
+      // Get fresh data if not cached
       const historicalData = marketDataService.getHistoricalData(symbol.toUpperCase());
       
       if (!historicalData || historicalData.length === 0) {
@@ -198,16 +216,20 @@ export function createTickerRoutes(marketDataService: MarketDataService): Router
       }
       
       // Limit data based on days parameter
-      const daysLimit = Math.min(parseInt(days as string) || 30, 30);
       const limitedData = historicalData.slice(-daysLimit);
+      
+      const responseData = {
+        symbol: symbol.toUpperCase(),
+        interval,
+        dataPoints: limitedData
+      };
+      
+      // Cache the data for 5 minutes
+      cacheService.set(cacheKey, responseData, 300000);
       
       res.json({
         success: true,
-        data: {
-          symbol: symbol.toUpperCase(),
-          interval,
-          dataPoints: limitedData
-        },
+        data: responseData,
         count: limitedData.length,
         timestamp: new Date().toISOString()
       });

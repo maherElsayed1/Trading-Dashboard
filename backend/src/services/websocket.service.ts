@@ -206,6 +206,27 @@ export class WebSocketService {
     }, 30000); // 30 seconds
   }
 
+  public broadcastAlert(event: any): void {
+    const alertMessage: WSMessage = {
+      type: WSMessageType.ALERT,
+      data: {
+        alert: event.alert,
+        ticker: event.ticker,
+        message: event.message
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    // Broadcast to all connected clients
+    this.wss.clients.forEach((ws) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(alertMessage));
+      }
+    });
+
+    console.log(`📢 Alert broadcast to ${this.wss.clients.size} clients`);
+  }
+
   public getConnectionStats() {
     return {
       totalConnections: this.wss.clients.size,

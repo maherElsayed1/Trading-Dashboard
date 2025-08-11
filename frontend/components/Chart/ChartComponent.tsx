@@ -13,7 +13,8 @@ import {
   CandlestickSeries,
   LineSeries,
   AreaSeries,
-  ColorType
+  ColorType,
+  Time
 } from 'lightweight-charts';
 import { HistoricalDataPoint } from '../../../shared/types/ticker.types';
 
@@ -67,7 +68,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
           value: point.close,
         } as LineData;
       }
-    }).sort((a, b) => a.time - b.time);
+    }).sort((a, b) => (a.time as number) - (b.time as number));
   };
 
   // Filter data based on timeframe
@@ -170,7 +171,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
   useEffect(() => {
     if (!chartRef.current || !data || data.length === 0) return;
 
-    // Reset current candle when changing chart type or symbol
+    // Reset current candle when changing chart type, symbol, or timeframe
     currentCandleRef.current = null;
 
     // Remove old series if exists
@@ -180,7 +181,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
     }
 
     // Add new series based on chart type
-    let series: any;
+    let series: ISeriesApi<'Candlestick' | 'Line' | 'Area'>;
     const filteredData = filterDataByTimeframe(data);
     const formattedData = formatDataForChart(filteredData);
     
@@ -189,6 +190,9 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
       const lastPoint = formattedData[formattedData.length - 1];
       lastUpdateTimeRef.current = lastPoint.time as number;
     }
+    
+    // Reset current candle when data changes
+    currentCandleRef.current = null;
 
     switch (chartType) {
       case 'candlestick':
@@ -224,110 +228,74 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
     chartRef.current.timeScale().fitContent();
   }, [data, chartType, timeframe]); // Remove currentPrice from deps to prevent recreation
 
-  // Add real-time price updates to the chart
+  // Add real-time price updates to the chart - SIMPLIFIED WITH PROPER TIMESTAMPS
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!seriesRef.current || !chartRef.current || currentPrice === undefined || currentPrice === null) {
       return;
     }
     
     try {
-      // Get current time in seconds
       const now = Math.floor(Date.now() / 1000);
       
-      // Add new data point based on chart type
       if (chartType === 'candlestick') {
-        // For candlestick, we need to manage candles properly
-        // Create a new candle every 15 seconds, update the current one otherwise
-        const candleInterval = 15; // 15 second candles for real-time
+        const candleInterval = 15; // 15 second candles
+        const currentPeriod = Math.floor(now / candleInterval) * candleInterval;
         
-        if (!currentCandleRef.current) {
-          // Initialize with first candle - align to the next 15-second boundary after last historical data
-          // This ensures immediate candle creation, not waiting for future time
-          const alignedTime = Math.ceil((lastUpdateTimeRef.current + 1) / candleInterval) * candleInterval;
-          
-          console.log(`[Chart] Initializing first real-time candle:`, {
-            now,
-            lastHistorical: lastUpdateTimeRef.current,
-            alignedTime,
-            timeUntilNext: alignedTime + candleInterval - now,
-            willCreateAt: new Date(alignedTime * 1000).toLocaleTimeString()
-          });
+        // Initialize or update candle
+        if (!currentCandleRef.current || currentCandleRef.current.time < currentPeriod) {
+          // Need a new candle
+          console.log(`[NEW CANDLE] ${new Date(currentPeriod * 1000).toLocaleTimeString()} | Price: ${currentPrice.toFixed(2)}`);
           
           currentCandleRef.current = {
-            time: alignedTime,
+            time: currentPeriod,
             open: currentPrice,
             high: currentPrice,
             low: currentPrice,
             close: currentPrice,
           };
           
-          // Add the first candle to the chart
-          const newCandleData: CandlestickData = {
-            time: alignedTime,
-            open: currentPrice,
-            high: currentPrice,
-            low: currentPrice,
-            close: currentPrice,
-          };
-          seriesRef.current.update(newCandleData);
-          
-        } else {
-          // Check if we should create a new candle based on aligned time boundaries
-          const nextCandleTime = Math.floor((now / candleInterval) + 1) * candleInterval;
-          const currentCandleTime = Math.floor(currentCandleRef.current.time / candleInterval) * candleInterval;
-          
-          // If current time has moved to the next 15-second boundary
-          if (now >= currentCandleRef.current.time + candleInterval) {
-            // Time for a new candle
-            const newCandleTime = currentCandleRef.current.time + candleInterval;
-            
-            console.log(`[Chart] Creating new candle:`, {
-              now,
-              currentCandleTime: currentCandleRef.current.time,
-              newCandleTime,
-              elapsed: now - currentCandleRef.current.time,
-              newTime: new Date(newCandleTime * 1000).toLocaleTimeString()
-            });
-            
-            currentCandleRef.current = {
-              time: newCandleTime,
+          // Add new candle
+          try {
+            seriesRef.current.update({
+              time: currentPeriod as Time,
               open: currentPrice,
               high: currentPrice,
               low: currentPrice,
               close: currentPrice,
-            };
-            
-            // Add the new candle to the chart
-            const newCandleData: CandlestickData = {
-              time: newCandleTime,
-              open: currentPrice,
-              high: currentPrice,
-              low: currentPrice,
-              close: currentPrice,
-            };
-            seriesRef.current.update(newCandleData);
-            
-          } else {
-            // Update the existing candle (still within the same 15-second period)
-            currentCandleRef.current.high = Math.max(currentCandleRef.current.high, currentPrice);
-            currentCandleRef.current.low = Math.min(currentCandleRef.current.low, currentPrice);
-            currentCandleRef.current.close = currentPrice;
-            
-            console.log(`[Chart] Updating candle:`, {
-              time: currentCandleRef.current.time,
-              timeLeft: currentCandleRef.current.time + candleInterval - now,
-              ohlc: `O:${currentCandleRef.current.open} H:${currentCandleRef.current.high} L:${currentCandleRef.current.low} C:${currentCandleRef.current.close}`
             });
+          } catch (err) {
+            console.error('[ERROR] Adding new candle:', err);
+          }
+          
+        } else if (currentCandleRef.current.time === currentPeriod) {
+          // Update existing candle
+          const oldHigh = currentCandleRef.current.high;
+          const oldLow = currentCandleRef.current.low;
+          const oldClose = currentCandleRef.current.close;
+          
+          currentCandleRef.current.high = Math.max(currentCandleRef.current.high, currentPrice);
+          currentCandleRef.current.low = Math.min(currentCandleRef.current.low, currentPrice);
+          currentCandleRef.current.close = currentPrice;
+          
+          // Only log and update if values changed
+          if (oldHigh !== currentCandleRef.current.high || 
+              oldLow !== currentCandleRef.current.low || 
+              oldClose !== currentCandleRef.current.close) {
+            const timeLeft = candleInterval - (now - currentPeriod);
+            console.log(`[UPDATE] ${timeLeft}s left | Price: ${currentPrice.toFixed(2)} | H:${currentCandleRef.current.high.toFixed(2)} L:${currentCandleRef.current.low.toFixed(2)}`);
             
-            // Update the chart with the modified candle
-            const updatedCandleData: CandlestickData = {
-              time: currentCandleRef.current.time,
-              open: currentCandleRef.current.open,
-              high: currentCandleRef.current.high,
-              low: currentCandleRef.current.low,
-              close: currentCandleRef.current.close,
-            };
-            seriesRef.current.update(updatedCandleData);
+            try {
+              seriesRef.current.update({
+                time: currentPeriod as Time,
+                open: currentCandleRef.current.open,
+                high: currentCandleRef.current.high,
+                low: currentCandleRef.current.low,
+                close: currentCandleRef.current.close,
+              });
+            } catch (err) {
+              console.error('[ERROR] Updating candle:', err);
+            }
           }
         }
         
@@ -337,7 +305,7 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
         lastUpdateTimeRef.current = updateTime;
         
         const lineData: LineData = {
-          time: updateTime,
+          time: updateTime as Time,
           value: currentPrice,
         };
         seriesRef.current.update(lineData);
@@ -349,22 +317,26 @@ export const ChartComponent: React.FC<ChartComponentProps> = ({
         try {
           seriesRef.current.removePriceLine(priceLineRef.current);
           priceLineRef.current = null;
-        } catch (e) {
+        } catch {
           // Ignore if price line doesn't exist
         }
       }
       
-      // Auto-scroll to the latest data
-      chartRef.current.timeScale().scrollToRealTime();
+      // Auto-scroll to the latest data and force a redraw
+      if (chartRef.current) {
+        chartRef.current.timeScale().scrollToRealTime();
+        // Force the chart to recalculate its visible range
+        chartRef.current.timeScale().fitContent();
+      }
       
       // Flash update indicator
       setIsUpdating(true);
       setTimeout(() => setIsUpdating(false), 500);
       
-    } catch (error) {
-      console.error('[ChartComponent] Error updating chart:', error);
+    } catch {
+      // Silently handle errors
     }
-  }, [currentPrice, symbol, chartType]); // Update when price changes
+  }, [currentPrice, chartType]); // Update when price or chart type changes
 
   const handleTimeframeChange = (tf: Timeframe) => {
     setTimeframe(tf);

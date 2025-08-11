@@ -3,6 +3,9 @@
 import React, { useState, lazy, Suspense } from 'react';
 import { Layout } from '../Layout/Layout';
 import { TickerList } from '../TickerList/TickerList';
+import { AlertsPanel } from '../Alerts/AlertsPanel';
+import { AlertNotification } from '../Alerts/AlertNotification';
+import { ProtectedRoute } from '../Auth/ProtectedRoute';
 import { useTickers } from '../../hooks/useTickers';
 import { useHistoricalData } from '../../hooks/useHistoricalData';
 import { Ticker } from '../../../shared/types/ticker.types';
@@ -15,7 +18,7 @@ const ChartComponent = lazy(() =>
 export const Dashboard: React.FC = () => {
   const { tickers, loading, error, isConnected } = useTickers();
   const [selectedTicker, setSelectedTicker] = useState<Ticker | null>(null);
-  const { data: historicalData, loading: historyLoading } = useHistoricalData(selectedTicker?.symbol || null);
+  const { data: historicalData } = useHistoricalData(selectedTicker?.symbol || null);
 
   // Update selected ticker when it changes in the tickers array (real-time updates)
   React.useEffect(() => {
@@ -32,8 +35,12 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <Layout isConnected={isConnected}>
-      <div className="space-y-6">
+    <ProtectedRoute>
+      <Layout isConnected={isConnected}>
+        {/* Alert Notifications */}
+        <AlertNotification tickers={tickers} />
+        
+        <div className="space-y-6">
         {/* Dashboard Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -124,6 +131,9 @@ export const Dashboard: React.FC = () => {
           </div>
         )}
 
+        {/* Alerts Panel */}
+        <AlertsPanel tickers={tickers} />
+
         {/* Ticker List */}
         <TickerList
           tickers={tickers}
@@ -142,7 +152,8 @@ export const Dashboard: React.FC = () => {
             </p>
           </div>
         )}
-      </div>
-    </Layout>
+        </div>
+      </Layout>
+    </ProtectedRoute>
   );
 };

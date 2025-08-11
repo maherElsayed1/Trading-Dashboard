@@ -1,8 +1,9 @@
+import { EventEmitter } from 'events';
 import { WebSocket } from 'ws';
 import { TickerModel } from '../models/ticker.model';
 import { PriceUpdate, WSMessage, WSMessageType } from '../../../shared/types/ticker.types';
 
-export class MarketDataService {
+export class MarketDataService extends EventEmitter {
   private tickerModel: TickerModel;
   private updateInterval: NodeJS.Timeout | null = null;
   private subscribers: Map<string, Set<WebSocket>> = new Map();
@@ -10,6 +11,7 @@ export class MarketDataService {
   private updateFrequency: number = 2000; // 2 seconds default
 
   constructor() {
+    super();
     this.tickerModel = new TickerModel();
     this.initializeSubscriptions();
   }
@@ -53,6 +55,8 @@ export class MarketDataService {
         const updated = this.tickerModel.updatePrice(ticker.symbol);
         if (updated) {
           this.broadcastPriceUpdate(ticker.symbol, updated);
+          // Emit event for alert checking
+          this.emit('price-update', updated);
         }
       }
     });

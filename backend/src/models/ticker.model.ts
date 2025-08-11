@@ -126,7 +126,7 @@ export class TickerModel {
   }
 
   private generateHistoricalData(): void {
-    const now = new Date('2025-08-11T16:00:00'); // Today at market close
+    const now = new Date(); // Current time
     
     TICKER_CONFIGS.forEach(config => {
       const history: HistoricalDataPoint[] = [];
@@ -163,13 +163,20 @@ export class TickerModel {
         }
       }
       
-      // Generate more granular data for today (15-minute candles)
+      // Generate more granular data for today (15-minute candles) up to 1 minute ago
       const today = new Date(now);
-      today.setHours(9, 30, 0, 0);
+      today.setHours(0, 0, 0, 0); // Start from midnight
+      const oneMinuteAgo = new Date(now.getTime() - 60000); // 1 minute ago
       
-      for (let minutes = 0; minutes < 390; minutes += 15) { // 6.5 hours of trading
+      // Generate 15-minute candles from midnight until 1 minute ago
+      for (let minutes = 0; minutes < 24 * 60; minutes += 15) { // Full day in 15-min intervals
         const candleTime = new Date(today);
         candleTime.setMinutes(candleTime.getMinutes() + minutes);
+        
+        // Stop if we've reached current time
+        if (candleTime >= oneMinuteAgo) {
+          break;
+        }
         
         const intraVolatility = config.volatility * 0.3;
         const open = currentPrice;

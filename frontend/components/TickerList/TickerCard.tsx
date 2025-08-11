@@ -76,11 +76,11 @@ export const TickerCard: React.FC<TickerCardProps> = ({ ticker, isSelected, onCl
           <p className="text-sm text-gray-400">{ticker.name}</p>
         </div>
         <div className={`px-2 py-1 rounded text-xs font-medium ${
-          ticker.type === 'crypto' 
+          ticker.symbol.includes('-USD') 
             ? 'bg-purple-900/30 text-purple-400 border border-purple-800' 
             : 'bg-blue-900/30 text-blue-400 border border-blue-800'
         }`}>
-          {ticker.type?.toUpperCase()}
+          {ticker.symbol.includes('-USD') ? 'CRYPTO' : 'STOCK'}
         </div>
       </div>
 
@@ -116,9 +116,9 @@ export const TickerCard: React.FC<TickerCardProps> = ({ ticker, isSelected, onCl
             <p className="text-sm font-medium text-gray-300">{formatVolume(ticker.volume)}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Market Cap</p>
+            <p className="text-xs text-gray-500">24h High</p>
             <p className="text-sm font-medium text-gray-300">
-              {ticker.marketCap ? `$${formatVolume(ticker.marketCap)}` : 'N/A'}
+              ${ticker.high.toFixed(2)}
             </p>
           </div>
         </div>

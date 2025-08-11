@@ -241,6 +241,14 @@ const options: swaggerJsdoc.Options = {
             }
           }
         }
+      },
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'JWT authentication token'
+        }
       }
     },
     tags: [
@@ -259,6 +267,14 @@ const options: swaggerJsdoc.Options = {
       {
         name: 'WebSocket',
         description: 'WebSocket documentation (not REST endpoints)'
+      },
+      {
+        name: 'Authentication',
+        description: 'User authentication endpoints'
+      },
+      {
+        name: 'Alerts',
+        description: 'Price alert management endpoints'
       }
     ]
   },

@@ -1,6 +1,6 @@
 import { Ticker } from '../../shared/types/ticker.types';
 
-export type WebSocketEventType = 'price-update' | 'error' | 'connected' | 'disconnected';
+export type WebSocketEventType = 'price-update' | 'error' | 'connected' | 'disconnected' | 'alert';
 
 export interface WebSocketEvent {
   type: WebSocketEventType;
@@ -43,7 +43,6 @@ class WebSocketService {
       this.ws = new WebSocket(this.url);
 
       this.ws.onopen = () => {
-        console.log('WebSocket connected');
         this.reconnectAttempts = 0;
         this.emit({ type: 'connected' });
         
@@ -69,29 +68,33 @@ class WebSocketService {
                 timestamp: data.timestamp || new Date().toISOString()
               } as PriceUpdateEvent,
             });
+          } else if (data.type === 'alert' && data.data) {
+            // Handle alert broadcast from backend
+            this.emit({
+              type: 'alert',
+              data: data.data,
+            });
           } else if (data.type === 'error') {
             this.emit({
               type: 'error',
               data: data.message || data.error || 'Unknown error',
             });
           } else if (data.type === 'connection') {
-            console.log('WebSocket welcome message received:', data.data);
+            // Handle connection message silently
           } else if (data.type === 'subscription_confirmed') {
-            console.log('Subscription confirmed:', data.data);
+            // Handle subscription confirmation silently
           }
         } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
+          // Silently handle parse errors
         }
       };
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
         this.emit({ type: 'error', data: 'WebSocket connection error' });
         reject(error);
       };
 
       this.ws.onclose = () => {
-        console.log('WebSocket disconnected');
         this.emit({ type: 'disconnected' });
         
         if (!this.isIntentionallyClosed) {
@@ -103,17 +106,14 @@ class WebSocketService {
 
   private attemptReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max reconnection attempts reached');
       return;
     }
 
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
     
-    console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-    
     this.reconnectTimeout = setTimeout(() => {
-      this.connect().catch(console.error);
+      this.connect().catch(() => {});
     }, delay);
   }
 
@@ -135,7 +135,6 @@ class WebSocketService {
 
   subscribe(symbol: string) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('WebSocket not connected. Will subscribe when connected.');
       this.subscribedSymbols.add(symbol);
       return;
     }
@@ -156,12 +155,10 @@ class WebSocketService {
 
   private sendMessage(type: string, data: any) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('WebSocket not connected');
       return;
     }
 
     const message = JSON.stringify({ type, data });
-    console.log('[WebSocket] Sending message:', message);
     this.ws.send(message);
   }
 
@@ -175,6 +172,10 @@ class WebSocketService {
     return () => {
       this.subscribers.get(event)?.delete(callback);
     };
+  }
+
+  off(event: WebSocketEventType, callback: (event: WebSocketEvent) => void) {
+    this.subscribers.get(event)?.delete(callback);
   }
 
   private emit(event: WebSocketEvent) {

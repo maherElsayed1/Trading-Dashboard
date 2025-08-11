@@ -18,6 +18,13 @@ export interface TickerHistory {
   data: HistoricalDataPoint[];
 }
 
+export interface MarketStatus {
+  isOpen: boolean;
+  updateFrequency: number;
+  totalSubscriptions: number;
+  tickerCount: number;
+}
+
 export interface HistoricalDataPoint {
   timestamp: string;
   open: number;
@@ -50,7 +57,8 @@ export enum WSMessageType {
   UNSUBSCRIBE = 'unsubscribe',
   PRICE_UPDATE = 'price_update',
   ERROR = 'error',
-  HEARTBEAT = 'heartbeat'
+  HEARTBEAT = 'heartbeat',
+  ALERT = 'alert'
 }
 
 export interface SubscribeMessage {
