@@ -211,6 +211,7 @@ npm test
 ## 📝 Documentation
 
 - [Project Status](PROJECT_STATUS.md) - Current development progress
+- [Future Enhancements](docs/FUTURE_ENHANCEMENTS.md) - Roadmap and enhancement ideas
 - [Deployment Guide](docs/DEPLOYMENT.md) - Complete deployment instructions
 - [AI Assistant Guide](CLAUDE.md) - Context for AI development
 - [API Documentation](http://localhost:3001/api-docs) - Interactive Swagger UI
@@ -227,9 +228,20 @@ npm test
 
 MIT
 
-## 🎯 Roadmap
+## 🎯 What's Next?
 
-See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed phase breakdown and progress tracking.
+The project is complete and ready for production! For future enhancements and learning opportunities:
+
+- **[Future Enhancements Guide](docs/FUTURE_ENHANCEMENTS.md)** - Comprehensive roadmap with:
+  - Real market data integration (Alpha Vantage, Yahoo Finance, etc.)
+  - Advanced trading features (technical indicators, portfolio tracking)
+  - Database persistence (PostgreSQL, Redis)
+  - AI/ML price predictions
+  - Mobile app development
+  - Cloud deployment guides
+  - And much more!
+
+See [PROJECT_STATUS.md](PROJECT_STATUS.md) for completed features and development history.
 
 ---
 *Built with ❤️ using Next.js, Node.js, and TradingView Lightweight Charts*
